@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+  <link rel="stylesheet" href="css/styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@300&&family=Tilt+Neon&display=swap");
+* {
+  box-sizing: border-box;
+  /*   display: flex; */
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  text-align: center;
+  background: linear-gradient(to bottom right, yellow, cyan, magenta);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /*   height: 100%; */
+}
+div#calculator {
+  background-color: rgba(50, 250, 50, 0.3);
+  height: 80%;
+  width: 70%;
+  border-radius: 10%;
+  border: 2px solid white;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2%;
+  /*   align-items: center; */
+  justify-content: center;
+  padding: 2%;
+  box-sizing: border-box;
+}
+input#display {
+  height: 15%;
+  width: 80%;
+  font-family: "Inconsolata", monospace;
+  text-align: right;
+  padding-right: 2%;
+  font-size: calc(3vw + 3vh);
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(white 20%, rgba(100, 100, 100, 0.2));
+}
+.button-area {
+  display: flex;
+  flex-wrap: wrap;
+  height: 80%;
+  /*   border: 1px solid white; */
+  align-items: center;
+  justify-content: center;
+  gap: 2%;
+}
+#buttons1 {
+  width: 70%;
+  gap: 2%;
+  /*   flex-direction: row-reverse; */
+  /*   align-content: flex-end; */
+}
+#buttons2 {
+  width: 20%;
+  /*   flex-direction: column; */
+  /*   flex-wrap: wrap; */
+}
+.number-button {
+  height: 20%;
+  flex: 1 0 30%;
+  background: linear-gradient(lightblue, yellow);
+}
+.input-button {
+  cursor: pointer;
+  font-size: calc(2vw + 1vh);
+  overflow: hidden;
+}
+.operator {
+  height: 15%;
+  flex: 0 0 80%;
+  background: linear-gradient(pink, orange);
+}
+#equal {
+  height: 20%;
+  flex: 2 0 60%;
+  order: 10;
+}
+#clear {
+  background: linear-gradient(pink, red);
+}
+    </style>
+</head>
+<body>
+    <div id="calculator">
+  <input type="text" id="display" maxLength="10" disabled>
+  <div class="button-area" id="buttons1">
+    <button class="operator input-button" id="equal" type="button">=</button>
+  </div>
+  <div class="button-area" id="buttons2">
+    <button class="operator input-button" id="clear" type="button">C</button>
+    <!--let's add a data-value here just in case the devloper wants to use words insead of signs      -->
+    <button class="operator input-button" data-value="+" id="add" type="button">+</button>
+    <button class="operator input-button" data-value="-" id="subtract" type="button">-</button>
+    <button class="operator input-button" data-value="*" id="multiply" type="button">*</button>
+    <button class="operator input-button" data-value="/" id="divide" type="button">/</button>
+  </div>
+</div>
+    <script>
+const calculator = document.getElementById("calculator");
+const resultDisplay = document.getElementById("display");
+const buttons1 = document.getElementById("buttons1");
+const clearButton = document.getElementById("clear");
+const equalButton = document.getElementById("equal");
+const addButton = document.getElementById("add");
+const minusButton = document.getElementById("subtract");
+const divideButton = document.getElementById("divide");
+const multiplyButton = document.getElementById("multiply");
+const maxLength = resultDisplay.getAttribute("maxLength");
+
+let tempNumber = null;
+let firstNumber = null;
+let secondNumber = null;
+let operation = null;
+let result = null;
+
+resultDisplay.value = "0";
+
+for (let i = 0; i < 10; i++) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.classList.add("number-button");
+  button.classList.add("input-button");
+  button.textContent = i;
+  button.setAttribute("data-value", i);
+  if (i === 0) {
+    button.style.order = 1;
+  }
+  buttons1.appendChild(button);
+}
+
+const numberButtons = document.querySelectorAll(".number-button");
+
+numberButtons.forEach((button, index) => {
+  //take the string of the data-value attached to the button and save it as an int (using parseInt()) to the variable dataValue
+  let dataValue = parseInt(button.getAttribute("data-value"));
+
+  //attach an event listener that listens for a 'click' on each button and then executes some function
+  button.addEventListener("click", function (event) {
+    if (resultDisplay.value.length < maxLength) {
+      //as long as the numbers shown on the display is less than maxLength of 10 we will do this
+      if (operation === null) {
+        //if there is no operation (haven't clicked on operation button) do this
+        if (firstNumber === null || firstNumber === 0) {
+          //if the first number variable is null or 0 do this
+          firstNumber = dataValue;
+        } else {
+          //otherwise there is a value in firstNumber so we will append something to it
+          //we will firstNumber into a string using toString() then concatenate the dataValue integer to it which will turn the whole thing into a string. Then we turn the string into a number with parseInt() and save it to firstNumber
+          firstNumber = parseInt(firstNumber.toString().concat(dataValue));
+        }
+        //then we will write the first number to the display since the display is type="text" we will need to turn firstNumber back into a string with toString() method
+        resultDisplay.value = firstNumber.toString();
+      } else {
+        //if the user has clicked an operation button do this. now we know user has clicked an operation so we can apply the logic from the firstNumber to the secondNumber
+        if (secondNumber === null || secondNumber === 0) {
+          secondNumber = dataValue;
+        } else {
+          secondNumber = parseInt(secondNumber.toString().concat(dataValue));
+        }
+        resultDisplay.value = secondNumber.toString();
+      }
+    }
+  });
+});
+
+//let's set up a clear function that will write 0 to the display and turn firstNumber, secondNumber, operation, and result to null
+
+function clearValues() {
+  //reassign all of our initilized values to null
+  tempNumber = null;
+  firstNumber = null;
+  secondNumber = null;
+  operation = null;
+  result = null;
+  resultDisplay.value = 0;
+}
+//we need to assign the clearValues function to the clear button by applying an event listener
+clearButton.addEventListener("click", function () {
+  clearValues();
+});
+
+// now we need to get the values of the operator buttons when the use clicks an operator button "+,-,*,/" etc. we should set the operation variable to that value
+
+const operatorButtons = document.querySelectorAll(".operator");
+
+//we will loop over each button using a forEach loop
+operatorButtons.forEach((button) => {
+  // console.log(button);
+  //let's add an event listener to each button
+  //we will pass the event object that is clicked to the anonoymous function
+  button.addEventListener("click", function (event) {
+    // console.log(event);
+    //we can't see everything that is in the object in the code pen console but we will use event.target.id
+    const thisOperation = event.target.id;
+    console.log(thisOperation);
+    //now let's apply an operation using a SWITCH (case) only if the firstNumber has been assigned and the secondNumber is still null
+    if (firstNumber !== null && secondNumber === null) {
+      switch (thisOperation) {
+        //we need to break each iteration of the switch case or else all of the will be applied
+        case "add":
+          operation = "+";
+          break;
+        case "subtract":
+          operation = "-";
+          break;
+        case "multiply":
+          operation = "*";
+          break;
+        case "divide":
+          operation = "/";
+          break;
+      }
+      resultDisplay.value = operation;
+    }
+  });
+});
+
+//now we need to add an event listener to the equal sign so that it will calculate our numbers (expression)
+
+equalButton.addEventListener("click", function (event) {
+  //we only need to check if secondNumber is NOT null because we have built our application in such a way that we can't arrive at secondNumber without a firstNumber and operation
+  if (secondNumber !== null) {
+    switch (operation) {
+      case "+":
+        result = firstNumber + secondNumber;
+        break;
+      case "-":
+        result = firstNumber - secondNumber;
+        break;
+      case "*":
+        result = firstNumber * secondNumber;
+        break;
+      case "/":
+        result = firstNumber / secondNumber;
+        break;
+    }
+    resultDisplay.value = result;
+  }
+});
+    </script>
+</body>
+</html>
